@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-import time
-import hashlib
-
 from valhallaAPI.valhalla import ValhallaAPI
 from cortexutils.analyzer import Analyzer
 
@@ -14,7 +11,7 @@ class ValhallaAnalyzer(Analyzer):
         Analyzer.__init__(self)
         self.valhalla_key = self.get_param('config.key', None, 'Missing Valhalla API key')
         self.polling_interval = self.get_param('config.polling_interval', 60)
-        self.v = v = ValhallaAPI(api_key=self.valhalla_key)
+        self.v = ValhallaAPI(api_key=self.valhalla_key)
 
     def check_response(self, response):
         if type(response) is not dict:
