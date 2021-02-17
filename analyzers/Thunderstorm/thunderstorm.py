@@ -40,24 +40,18 @@ class ThunderstormAnalyzer(Analyzer):
         predicate = "GetScanResult"
         value = "no matches"
 
-        result = {
-            "has_result": False
-        }
-
-        if len(raw) > 0: 
+        result = raw
+        if len(result) > 0: 
             # single sample, so get the first result
-            result = raw
-            result["has_result"] = True
-            matches = result.get('matches', [])
-            thor_level = result.get('level', 'none')
+            thor_level = result['level']
             level = "suspicious"
             if thor_level == "Alert":
                 level = "malicious"
-
-        matching_rules = []
-        for match in result['matches']:
-            matching_rules.append(match["rulename"])
-        value = ", ".join(matching_rules)
+            matching_rules = []
+            for match in result['matches']:
+                matching_rules.append(match["rulename"])
+            if len(matching_rules) > 0:
+                value = ", ".join(matching_rules)
 
         taxonomies.append(self.build_taxonomy(level, namespace, predicate, value))
         return {"taxonomies": taxonomies}

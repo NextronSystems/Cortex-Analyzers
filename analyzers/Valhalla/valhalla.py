@@ -27,7 +27,7 @@ class ValhallaAnalyzer(Analyzer):
         level = "info"
         namespace = "VALHALLA"
         predicate = "GetMatches"
-        value = "no YARA rule matches"
+        value = "no matches"
 
         result = {
             "has_result": True
@@ -45,7 +45,8 @@ class ValhallaAnalyzer(Analyzer):
         matching_rules = []
         for match in results:
             matching_rules.append(match["rulename"])
-        value = ", ".join(matching_rules)
+        if len(matching_rules) > 0:
+            value = ", ".join(matching_rules)
 
         taxonomies.append(self.build_taxonomy(level, namespace, predicate, value))
         return {"taxonomies": taxonomies}
