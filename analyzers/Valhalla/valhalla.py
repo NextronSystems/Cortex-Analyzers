@@ -27,24 +27,42 @@ class ValhallaAnalyzer(Analyzer):
         level = "info"
         namespace = "VALHALLA"
         predicate = "GetMatches"
-        value = "no matches"
+        value = "not set"
 
-        result = {
-            "has_result": True
-        }
-
+        # Get status and result set
+        status = raw.get('status', 'not set')
         results = raw.get('results', [])
-        if len(results) < 1:
-            result["has_result"] = False
-        else:
+        
+        # Status handling
+        if status == "error":
+            status = raw.get('message', 'not set')
+            value = status
+        if status == "empty":
+            value = "no matches found"
+
+        # If a single matching YARA rule could be found, then set suspicious
+        if len(results) > 0:
             level = "suspicious"
 
-        result["total"] = len(results)
-        result["matches"] = results
-
+        # Match handling
+        av_matches = []
+        avg_av_matches = 0
         matching_rules = []
         for match in results:
+            # Add rule to list
             matching_rules.append(match["rulename"])
+            # Sum up all AV matches
+            if 'positives' in match:
+                if isinstance(match['positives'], int):
+                    av_matches.append(match['positives'])
+        # Calculate average AV detection rate
+        if len(av_matches) > 0:
+            avg_av_matches = sum(av_matches)/len(av_matches)
+        # If AV engines also came to the conclusion that this is malicious, then mark it as malicious
+        if avg_av_matches > 10:
+            level = "malicious"
+
+        # Compose a list of all matching YARA rules for the value field
         if len(matching_rules) > 0:
             value = ", ".join(matching_rules)
 
@@ -57,7 +75,7 @@ class ValhallaAnalyzer(Analyzer):
             if len(data) == 64:
                 self.report(self.check_response(self.v.get_hash_info(data)))
             else:
-                self.error('Hash is not SHA256')
+                self.report({'status': 'error', 'message': 'hash is not SHA256', 'results': []})
         else:
             self.error('Invalid data type')
 
