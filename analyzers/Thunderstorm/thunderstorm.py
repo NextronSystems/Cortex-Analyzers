@@ -42,16 +42,31 @@ class ThunderstormAnalyzer(Analyzer):
 
         result = raw
         if len(result) > 0: 
-            # single sample, so get the first result
-            thor_level = result['level']
+            # A single match automatically makes it suspicious
             level = "suspicious"
+            # Get THOR's level 
+            thor_level = result['level']
+            # If that is 'Alert', then increase the level to malicious
             if thor_level == "Alert":
                 level = "malicious"
-            matching_rules = []
+            
+            # Get all matches that add a sub score to the total score
+            match_reasons = []
+            total_score = 0
             for match in result['matches']:
-                matching_rules.append(match["rulename"])
-            if len(matching_rules) > 0:
-                value = ", ".join(matching_rules)
+                # Fix /tmp/ folder finding caused by Cortex file upload
+                if "suspicious apt directory" in match['reason'].lower():
+                    # ignore this match
+                    continue
+                # Add sub score to total score 
+                if 'subscore' in match: 
+                    total_score += int(match['subscore'])
+                # YARA rule match
+                if 'rulename' in match: 
+                    match_reasons.append(match['rulename'])
+            # # Combine all rule names to a value
+            if len(match_reasons) > 0:
+                value = ", ".join(match_reasons)
 
         taxonomies.append(self.build_taxonomy(level, namespace, predicate, value))
         return {"taxonomies": taxonomies}
