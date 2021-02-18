@@ -15,14 +15,6 @@
       "type": "string",
       "multi": false,
       "required": true
-    },
-    {
-      "name": "polling_interval",
-      "description": "Define time interval between two requests attempts for the report",
-      "type": "number",
-      "multi": false,
-      "required": false,
-      "defaultValue": 60
     }
   ]
 }
