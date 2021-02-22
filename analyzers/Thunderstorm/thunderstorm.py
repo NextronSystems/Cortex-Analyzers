@@ -52,6 +52,8 @@ class ThunderstormAnalyzer(Analyzer):
             
             # Get all matches that add a sub score to the total score
             match_reasons = []
+            yara_matches = 0
+            other_matches = 0
             total_score = 0
             for match in result['matches']:
                 # Fix /tmp/ folder finding caused by Cortex file upload
@@ -64,9 +66,20 @@ class ThunderstormAnalyzer(Analyzer):
                 # YARA rule match
                 if 'rulename' in match: 
                     match_reasons.append(match['rulename'])
-            # # Combine all rule names to a value
+                    yara_matches += 1
+                else:
+                    other_matches += 1
+            
+            # Combine all rule names to a value
             if len(match_reasons) > 0:
-                value = ", ".join(match_reasons)
+                if len(match_reasons) < 4:
+                    value = ", ".join(match_reasons)
+                else:
+                    value = "[%d of different rule matches]" % len(match_reasons)
+            
+            # Add match type to the result set
+            result['yara_matches'] = yara_matches
+            result['other_matches'] = other_matches
 
         taxonomies.append(self.build_taxonomy(level, namespace, predicate, value))
         return {"taxonomies": taxonomies}
