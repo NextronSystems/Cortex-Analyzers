@@ -1,6 +1,6 @@
 {
-  "name": "THOR_Thunderstorm",
-  "version": "0.1",
+  "name": "THOR_Thunderstorm_ScanSample",
+  "version": "0.3.1",
   "author": "Florian Roth",
   "url": "https://github.com/NextronSystems/Cortex-Analyzers",
   "license": "AGPL-V3",
@@ -14,7 +14,8 @@
       "description": "Thunderstorm Server",
       "type": "string",
       "multi": false,
-      "required": true
+      "required": true,
+      "defaultValue": "thunderstorm.nextron-systems.com"
     },
     {
       "name": "thunderstorm_port",
